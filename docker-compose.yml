@@ -19,7 +19,7 @@ services:
         command: -config.file=/etc/promtail/config.yml
         volumes:
             - ./promtail-config.yml:/etc/promtail/config.yml
-            - /var/log:/var/log
+            - ./flog.log:/var/log/flog.log
         networks:
             - loki
 
