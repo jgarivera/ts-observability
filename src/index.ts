@@ -7,6 +7,15 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 
+app.get('/warn', (req: Request, res: Response) => {
+    try {
+        throw new Error('Some warning');
+    } catch (err) {
+        res.send('A warning has occured');
+        logger.warn({ err }, 'Warning has occured');
+    }
+});
+
 app.get('/error', (req: Request, res: Response) => {
     try {
         throw new Error('Some error');
