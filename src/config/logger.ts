@@ -1,11 +1,22 @@
-import { createLogger, nameFromLevel, stdSerializers, WriteFn } from 'bunyan';
+import { createLogger, nameFromLevel, safeCycles, stdSerializers, WriteFn } from 'bunyan';
+import { createWriteStream } from 'fs';
 
 class StringLevelNameStream implements WriteFn {
-    write(data: Object): void {
-        const logObject = JSON.parse(data.toString());
-        // Change log level number to name and write it out
-        logObject.level = nameFromLevel[logObject.level];
-        process.stdout.write(JSON.stringify(logObject) + '\n');
+    constructor(private filePath: string) {}
+
+    write(log: any): void {
+        const fileStream = createWriteStream(this.filePath, {
+            flags: 'a',
+            encoding: 'utf8',
+        });
+
+        const clonedLog = Object.assign({}, log, {
+            level: nameFromLevel[log.level],
+        });
+
+        const logLine = JSON.stringify(clonedLog, safeCycles()) + '\n';
+        process.stdout.write(logLine);
+        fileStream.write(logLine);
     }
 }
 
@@ -18,7 +29,8 @@ export const logger = createLogger({
     },
     streams: [
         {
-            stream: new StringLevelNameStream(),
+            type: 'raw',
+            stream: new StringLevelNameStream('/workspace/app.log'),
         },
     ],
 });
