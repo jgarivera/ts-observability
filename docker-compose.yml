@@ -11,8 +11,6 @@ services:
             - ./loki-config.yml:/etc/loki/config.yml
         ports:
             - '3100:3100'
-        networks:
-            - loki
 
     promtail:
         image: grafana/promtail:2.6.0
@@ -20,15 +18,11 @@ services:
         volumes:
             - ./promtail-config.yml:/etc/promtail/config.yml
             - ./app.log:/var/log/app.log
-        networks:
-            - loki
 
     grafana:
         image: grafana/grafana:latest
         ports:
             - '3000:3000'
-        networks:
-            - loki
 
     jaeger:
         image: jaegertracing/all-in-one:latest
@@ -37,5 +31,3 @@ services:
             - '6832:6832/udp'
             - '16686:16686'
             - '14268:14268'
-        networks:
-            - loki
