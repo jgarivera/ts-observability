@@ -1,3 +1,7 @@
+import { initializeTracer } from './config/tracer';
+
+initializeTracer();
+
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { logger } from './config/logger';
