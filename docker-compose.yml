@@ -20,7 +20,7 @@ services:
             - ./app.log:/var/log/app.log
 
     grafana:
-        image: grafana/grafana:latest
+        image: grafana/grafana:9.0.6
         ports:
             - '3000:3000'
 
