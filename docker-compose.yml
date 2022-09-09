@@ -31,3 +31,10 @@ services:
             - '6832:6832/udp'
             - '16686:16686'
             - '14268:14268'
+
+    prometheus:
+        image: prom/prometheus:v2.38.0
+        ports:
+            - 9090:9090
+        volumes:
+            - ./prometheus-config.yml:/etc/prometheus/prometheus.yml
