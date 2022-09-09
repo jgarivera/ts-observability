@@ -10,4 +10,6 @@ Visualizations are done in Grafana.
   - Loki
   - Promtail
 - Metrics
+  - Prometheus
 - Tracing
+  - Jaeger
