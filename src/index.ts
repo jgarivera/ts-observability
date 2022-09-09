@@ -5,6 +5,9 @@ initializeTracer();
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { logger } from './config/logger';
+import { initializeMetrics } from './config/metrics';
+import { register } from 'prom-client';
+initializeMetrics();
 
 dotenv.config();
 
@@ -32,6 +35,15 @@ app.get('/error', (req: Request, res: Response) => {
 app.get('/', (req: Request, res: Response) => {
     res.send('Some information');
     logger.info({ req }, 'Some information');
+});
+
+app.get('/metrics', async (req: Request, res: Response) => {
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (ex) {
+        res.status(500).end(ex);
+    }
 });
 
 app.listen(port, () => {
