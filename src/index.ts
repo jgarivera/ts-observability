@@ -1,16 +1,16 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { initializeTracer } from './config/tracer';
+import { initializeTracer } from './tracer';
 
 initializeTracer();
 
 import express, { Express } from 'express';
 
-import { initializeMetrics } from './config/metrics';
+import { initializeMetrics } from './metrics';
 
 initializeMetrics();
-import { logger } from './config/logger';
+import { logger } from './logger';
 import router from './route';
 
 const app: Express = express();

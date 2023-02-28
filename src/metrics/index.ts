@@ -1,5 +1,5 @@
 import { collectDefaultMetrics, Counter } from 'prom-client';
-import { logger } from './logger';
+import { logger } from '../logger';
 
 export const initializeMetrics = () => {
     collectDefaultMetrics();

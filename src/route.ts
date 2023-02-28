@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { logger } from './config/logger';
+import { logger } from './logger';
 import { register } from 'prom-client';
 
 const router = Router();
