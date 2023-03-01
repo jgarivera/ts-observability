@@ -1,39 +1,35 @@
 import { Router, Request, Response } from 'express';
-import { logger } from './logger';
-import { register } from 'prom-client';
+import Logger from 'bunyan';
 
-const router = Router();
+export class ApplicationRoutes {
+    private router: Router = Router();
 
-router.get('/warn', (req: Request, res: Response) => {
-    try {
-        throw new Error('Some warning');
-    } catch (err) {
-        res.send('A warning has occured');
-        logger.warn({ err }, 'Warning has occured');
+    public constructor(private logger: Logger) {
+        this.router.get('/warn', (req: Request, res: Response) => {
+            try {
+                throw new Error('Some warning');
+            } catch (err) {
+                res.send('A warning has occured');
+                this.logger.warn({ err }, 'Warning has occured');
+            }
+        });
+
+        this.router.get('/error', (req: Request, res: Response) => {
+            try {
+                throw new Error('Some error');
+            } catch (err) {
+                res.send('An error has occured');
+                this.logger.error({ err }, 'Error has occured');
+            }
+        });
+
+        this.router.get('/', (req: Request, res: Response) => {
+            res.send('Some information');
+            this.logger.info({ req }, 'Some information');
+        });
     }
-});
 
-router.get('/error', (req: Request, res: Response) => {
-    try {
-        throw new Error('Some error');
-    } catch (err) {
-        res.send('An error has occured');
-        logger.error({ err }, 'Error has occured');
+    public getRouter(): Router {
+        return this.router;
     }
-});
-
-router.get('/', (req: Request, res: Response) => {
-    res.send('Some information');
-    logger.info({ req }, 'Some information');
-});
-
-router.get('/metrics', async (req: Request, res: Response) => {
-    try {
-        res.set('Content-Type', register.contentType);
-        res.end(await register.metrics());
-    } catch (ex) {
-        res.status(500).end(ex);
-    }
-});
-
-export default router;
+}

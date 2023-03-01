@@ -1,23 +1,38 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { initializeTracer } from './tracer';
+import { ApplicationTracer } from './tracer';
+import { ApplicationMetrics } from './metrics';
+import { ApplicationLogger } from './logger';
 
-initializeTracer();
-
+import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import express, { Express } from 'express';
+import { ApplicationRoutes } from './route';
 
-import { initializeMetrics } from './metrics';
+const logger = new ApplicationLogger('app').getInstance();
 
-initializeMetrics();
-import { logger } from './logger';
-import router from './route';
+const tracer = new ApplicationTracer(
+    'app',
+    new JaegerExporter({
+        host: 'jaeger',
+    }),
+    logger
+);
+
+tracer.initialize();
+
+const metrics = new ApplicationMetrics(logger);
 
 const app: Express = express();
-app.use(router);
+const routes = new ApplicationRoutes(logger);
+
+app.use(routes.getRouter());
+app.use(metrics.getRouter());
 
 const port = process.env.PORT;
 
-app.listen(port, () => {
+app.listen(port, async () => {
+    metrics.initialize();
+
     logger.info(`Application running at port: ${port}`);
 });

@@ -1,17 +1,30 @@
+import Logger from 'bunyan';
+import { Router } from 'express';
 import { collectDefaultMetrics, Counter } from 'prom-client';
-import { logger } from '../logger';
+import router from './route';
 
-export const initializeMetrics = () => {
-    collectDefaultMetrics();
+export class ApplicationMetrics {
+    public constructor(private logger: Logger) {}
 
-    new Counter({
-        name: 'scrape_counter',
-        help: 'Number of scrapes (example of a counter with a collect fn)',
-        collect() {
-            // collect is invoked each time `register.metrics()` is called.
-            this.inc();
-        },
-    });
+    public initialize(): void {
+        collectDefaultMetrics();
+        this.registerMetrics();
 
-    logger.info('Metrics initialized');
-};
+        this.logger.info('Metrics initialized');
+    }
+
+    private registerMetrics(): void {
+        new Counter({
+            name: 'scrape_counter',
+            help: 'Number of scrapes (example of a counter with a collect fn)',
+            collect() {
+                // collect is invoked each time `register.metrics()` is called.
+                this.inc();
+            },
+        });
+    }
+
+    public getRouter(): Router {
+        return router;
+    }
+}

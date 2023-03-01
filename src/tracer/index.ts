@@ -2,24 +2,31 @@ import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { logger } from '../logger';
+import Logger from 'bunyan';
 
-const jaegerExporter = new JaegerExporter({
-    host: 'jaeger',
-});
+export class ApplicationTracer {
+    public constructor(
+        private serviceName: string,
+        private jaegerExporter: JaegerExporter,
+        private logger: Logger
+    ) {}
 
-const sdk = new NodeSDK({
-    serviceName: 'app',
-    traceExporter: jaegerExporter,
-    instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()],
-});
-
-export const initializeTracer = () => {
-    sdk.start()
-        .then(() => {
-            logger.info('Tracer initialized');
-        })
-        .catch((err) => {
-            logger.error({ err }, 'Error initializing tracer');
+    public async initialize(): Promise<void> {
+        const sdk = new NodeSDK({
+            serviceName: this.serviceName,
+            traceExporter: this.jaegerExporter,
+            instrumentations: [
+                new ExpressInstrumentation(),
+                new HttpInstrumentation(),
+            ],
         });
-};
+
+        try {
+            await sdk.start();
+
+            this.logger.info('Tracer initialized');
+        } catch (err) {
+            this.logger.error({ err }, 'Error initializing tracer');
+        }
+    }
+}
