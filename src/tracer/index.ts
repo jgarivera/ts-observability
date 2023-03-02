@@ -1,8 +1,19 @@
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-import { NodeSDK } from '@opentelemetry/sdk-node';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import Logger from 'bunyan';
+import {
+    BatchSpanProcessor,
+    ConsoleSpanExporter,
+    NodeTracerProvider,
+} from '@opentelemetry/sdk-trace-node';
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+
+// Not functionally required but gives some insight what happens behind the scenes
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 export class ApplicationTracer {
     public constructor(
@@ -11,22 +22,31 @@ export class ApplicationTracer {
         private logger: Logger
     ) {}
 
-    public async initialize(): Promise<void> {
-        const sdk = new NodeSDK({
-            serviceName: this.serviceName,
-            traceExporter: this.jaegerExporter,
+    public initialize(): void {
+        const resource = Resource.default().merge(
+            new Resource({
+                [SemanticResourceAttributes.SERVICE_NAME]: this.serviceName,
+            })
+        );
+
+        const provider = new NodeTracerProvider({
+            resource: resource,
+        });
+
+        const exporter = new ConsoleSpanExporter();
+        const batchProcessor = new BatchSpanProcessor(this.jaegerExporter);
+
+        provider.addSpanProcessor(batchProcessor);
+        provider.register();
+
+        registerInstrumentations({
+            tracerProvider: provider,
             instrumentations: [
-                new ExpressInstrumentation(),
                 new HttpInstrumentation(),
+                new ExpressInstrumentation(),
             ],
         });
 
-        try {
-            await sdk.start();
-
-            this.logger.info('Tracer initialized');
-        } catch (err) {
-            this.logger.error({ err }, 'Error initializing tracer');
-        }
+        this.logger.info('Tracer initialized');
     }
 }
