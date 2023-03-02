@@ -1,7 +1,5 @@
 import Logger from 'bunyan';
-import { Router } from 'express';
 import { collectDefaultMetrics, Counter } from 'prom-client';
-import router from './route';
 
 export class ApplicationMetrics {
     public constructor(private logger: Logger) {}
@@ -22,9 +20,5 @@ export class ApplicationMetrics {
                 this.inc();
             },
         });
-    }
-
-    public getRouter(): Router {
-        return router;
     }
 }
