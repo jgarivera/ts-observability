@@ -25,8 +25,7 @@ export class ApplicationRoutes {
         });
 
         this.router.get('/', (req: Request, res: Response) => {
-            res.send('Some information');
-            this.logger.info({ req }, 'Some information');
+            res.send('Received information');
         });
 
         this.router.get('/slow', async (req: Request, res: Response) => {
