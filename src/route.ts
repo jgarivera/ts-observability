@@ -29,6 +29,11 @@ export class ApplicationRoutes {
             this.logger.info({ req }, 'Some information');
         });
 
+        this.router.get('/slow', async (req: Request, res: Response) => {
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            res.send('Received information slowly');
+        });
+
         this.router.get('/metrics', async (req: Request, res: Response) => {
             try {
                 res.set('Content-Type', register.contentType);
