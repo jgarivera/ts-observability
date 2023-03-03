@@ -41,7 +41,7 @@ export class ApplicationRoutes {
             } catch (err) {
                 res.status(500).end(err);
             }
-        });        
+        });
     }
 
     public getRouter(): Router {
